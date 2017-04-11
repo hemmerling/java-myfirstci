@@ -15,11 +15,11 @@ stage('Build') {
     node('Comcave'){ 
         echo 'node Comcave, Stage 2 - We wait for 10 seconds'
         // sh 'sleep 10'
-        bat 'timeout /t 10'
+        // bat 'timeout /t 10' 
         // On Windows7, Jenkins tries to execute:
         // "C:\Program Files (x86)\Jenkins\workspace\myfirstci>timeout /t 10" 
         // It abors by the error message, on German Windows:
-        // "FEHLER: Die Eingabeumleitung wird nicht unterstützt. Prozess wird unverzzglichbeendet.""
+        // "FEHLER: Die Eingabeumleitung wird nicht unterstützt. Prozess wird unverzüglich beendet"
         echo 'node Comcave, Stage 2 - We continue'
     }
 }
