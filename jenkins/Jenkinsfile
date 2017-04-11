@@ -1,0 +1,25 @@
+// node{ sh 'uname' }
+stage('Checkout') {
+    echo 'Checkout'
+    node('Hemmerling'){ 
+        echo 'node Hemmerling, Stage 1'
+        checkout([$class: 'GitSCM', branches: [[name: '*/master']], doGenerateSubmoduleConfigurations: false, extensions: [], submoduleCfg: [], userRemoteConfigs: [[url: 'http://github.com/hemmerling/java-myfirstci']]])
+    }
+    node('Comcave'){ 
+        echo 'node Comcave, Stage 1'
+        git 'http://github.com/hemmerling/java-myfirstci'
+    }
+}
+stage('Build') {
+    echo 'Build'
+    node('Comcave'){ 
+        echo 'node Comcave, Stage 2 - We wait for 10 seconds'
+        // sh 'sleep 10'
+        bat 'timeout /t 10'
+        // On Windows7, Jenkins tries to execute:
+        // "C:\Program Files (x86)\Jenkins\workspace\myfirstci>timeout /t 10" 
+        // It abors by the error message, on German Windows:
+        // "FEHLER: Die Eingabeumleitung wird nicht unterstützt. Prozess wird unverzzglichbeendet.""
+        echo 'node Comcave, Stage 2 - We continue'
+    }
+}
