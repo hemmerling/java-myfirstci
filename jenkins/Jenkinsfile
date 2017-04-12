@@ -10,8 +10,9 @@ stage('Checkout') {
         git 'http://github.com/hemmerling/java-myfirstci'
     }
 }
-stage('Build') {
-    echo 'Build'
+stage('Wait') {
+    echo 'Wait'
+    echo env.PATH
     node('Comcave'){ 
         echo 'node Comcave, Stage 2 - We wait for 10 seconds'
         // sh 'sleep 10'
@@ -21,5 +22,19 @@ stage('Build') {
         // It abors by the error message, on German Windows:
         // "FEHLER: Die Eingabeumleitung wird nicht unterstützt. Prozess wird unverzüglich beendet"
         echo 'node Comcave, Stage 2 - We continue'
+    }
+}
+stage('Tools') {
+    echo 'Tools'
+    node('Comcave'){ 
+        def java = tool 'JDK'
+        //sh "${java}/bin/java.exe -version"
+        command "${java}/bin/java.exe -version"
+    }
+}
+stage('Global Variables') {
+    echo 'Global Variables'
+    node('Comcave'){ 
+        echo env.PATH
     }
 }
