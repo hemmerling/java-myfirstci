@@ -15,8 +15,8 @@ stage('Wait') {
     echo env.PATH
     node('Comcave'){ 
         echo 'node Comcave, Stage 2 - We wait for 10 seconds'
-        // sh 'sleep 10'
-        // bat 'timeout /t 10' 
+        sh 'sleep 10'
+        //bat 'timeout /t 10' 
         // On Windows7, Jenkins tries to execute:
         // "C:\Program Files (x86)\Jenkins\workspace\myfirstci>timeout /t 10" 
         // It abors by the error message, on German Windows:
@@ -28,9 +28,29 @@ stage('Tools') {
     echo 'Tools'
     node('Comcave'){ 
         def java = tool 'JDK'
+        // Jenkins on Windows doesn´t like "\" in path names:
+        //  org.codehaus.groovy.control.MultipleCompilationErrorsException: startup failed:
+        //  WorkflowScript: 36: unexpected char: '\' @ line 36, column 16.
+        //  bat "C:\Program Files\Java\jdk\bin\java.exe -version"
+        //        ^
+        //
+        // Jenkins on Windows doesn´t like spaces in path names:
+        //  Der Befehl "C:/Program" ist entweder falsch geschrieben oder
+        //  konnte nicht gefunden werden.  
+        
         //sh "${java}/bin/java.exe -version"
-        command "${java}/bin/java.exe -version"
+        sh "echo shelltest"
+        bat "echo command.com test"
+        //sh "java -version"
+        //bat "${java}\bin\java.exe -version"
+        //bat "C:/Programme/Java/jdk/bin/java.exe -version"
+        sh "C:/Programme/Java/jdk/bin/java.exe -version"
+        //bat "C:/Program Files/Java/jdk/bin/java.exe -version"
+        //bat "C:\Programme\Java\jdk\bin\java.exe -version"
+        //bat "C:\Program Files\Java\jdk\bin\java.exe -version"
+        // sh "C:/Program Files/Java/jdk/bin/java.exe -version"
     }
+    echo 'Tools - Ende'
 }
 stage('Global Variables') {
     echo 'Global Variables'
