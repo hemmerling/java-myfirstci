@@ -20,7 +20,7 @@ stage('Wait') {
         // On Windows7, Jenkins tries to execute:
         // "C:\Program Files (x86)\Jenkins\workspace\myfirstci>timeout /t 10" 
         // It abors by the error message, on German Windows:
-        // "FEHLER: Die Eingabeumleitung wird nicht unterstützt. Prozess wird unverzüglich beendet"
+        // "FEHLER: Die Eingabeumleitung wird nicht unterstÃ¼tzt. Prozess wird unverzÃ¼glich beendet"
         echo 'node Comcave, Stage 2 - We continue'
     }
 }
@@ -28,13 +28,13 @@ stage('Tools') {
     echo 'Tools'
     node('Comcave'){ 
         def java = tool 'JDK'
-        // Jenkins on Windows doesn´t like "\" in path names:
+        // Jenkins on Windows doesnÂ´t like "\" in path names:
         //  org.codehaus.groovy.control.MultipleCompilationErrorsException: startup failed:
         //  WorkflowScript: 36: unexpected char: '\' @ line 36, column 16.
         //  bat "C:\Program Files\Java\jdk\bin\java.exe -version"
         //        ^
         //
-        // Jenkins on Windows doesn´t like spaces in path names:
+        // Jenkins on Windows doesnÂ´t like spaces in path names:
         //  Der Befehl "C:/Program" ist entweder falsch geschrieben oder
         //  konnte nicht gefunden werden.  
         
@@ -56,5 +56,13 @@ stage('Global Variables') {
     echo 'Global Variables'
     node('Comcave'){ 
         echo env.PATH
+    }
+}
+
+stage('Maven') {
+    echo 'Maven'
+    node('Comcave'){ 
+        def mvnHome = tool 'M3'
+        sh "${mvnHome}/bin/mvn -B verify"
     }
 }
