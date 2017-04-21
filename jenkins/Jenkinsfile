@@ -20,7 +20,7 @@ stage('Wait') {
         // On Windows7, Jenkins tries to execute:
         // "C:\Program Files (x86)\Jenkins\workspace\myfirstci>timeout /t 10" 
         // It abors by the error message, on German Windows:
-        // "FEHLER: Die Eingabeumleitung wird nicht unterstÃ¼tzt. Prozess wird unverzÃ¼glich beendet"
+        // "FEHLER: Die Eingabeumleitung wird nicht unterstützt. Prozess wird unverzüglich beendet"
         echo 'node Comcave, Stage 2 - We continue'
     }
 }
@@ -28,13 +28,13 @@ stage('Tools') {
     echo 'Tools'
     node('Comcave'){ 
         def java = tool 'JDK'
-        // Jenkins on Windows doesnÂ´t like "\" in path names:
+        // Jenkins on Windows doesn´t like "\" in path names:
         //  org.codehaus.groovy.control.MultipleCompilationErrorsException: startup failed:
         //  WorkflowScript: 36: unexpected char: '\' @ line 36, column 16.
         //  bat "C:\Program Files\Java\jdk\bin\java.exe -version"
         //        ^
         //
-        // Jenkins on Windows doesnÂ´t like spaces in path names:
+        // Jenkins on Windows doesn´t like spaces in path names:
         //  Der Befehl "C:/Program" ist entweder falsch geschrieben oder
         //  konnte nicht gefunden werden.  
         
@@ -53,10 +53,76 @@ stage('Tools') {
     echo 'Tools - Ende'
 }
 stage('Global Variables') {
-    echo 'Global Variables'
+    echo '== Global Variables =='
     node('Comcave'){ 
         echo env.PATH
     }
+    echo '== Jenkins Set Environment Variables =='
+    node('Comcave'){ 
+        echo "The current build number, such as '153':"
+        echo env.BUILD_NUMBER
+        echo "The current build id, such as '2005-08-22_23-59-59' (YYYY-MM-DD_hh-mm-ss, defunct since version 1.597):"
+        echo env.BUILD_ID
+    
+        echo "The URL where the results of this build can be found (e.g. http://buildserver/jenkins/job/MyJobName/666/):"
+        echo env.BUILD_URL
+    
+        echo "The name of the node the current build is running on. Equals 'master' for master node:"
+        echo env.NODE_NAME
+	
+	    echo "Name of the project of this build. This is the name you gave your job when you first set it up. It's the third column of the Jenkins Dashboard main page:"
+        echo env.JOB_NAME
+	
+        echo "String of jenkins-${JOB_NAME}-${BUILD_NUMBER}. Convenient to put into a resource file, a jar file, etc for easier identification:"
+        echo env.BUILD_TAG
+	
+	    echo "Set to the URL of the Jenkins master that's running the build. This value is used by Jenkins CLI for example:"
+        echo env.JENKINS_URL
+
+	    echo "The unique number that identifies the current executor (among executors of the same machine) that's carrying out this build. This is the number you see in the 'build executor status', except that the number starts from 0, not 1:"
+        echo env.EXECUTOR_NUMBER
+
+	    echo "If your job is configured to use a specific JDK, this variable is set to the JAVA_HOME of the specified JDK. When this variable is set, PATH is also updated to have $JAVA_HOME/bin:"
+        echo env.JAVA_HOME
+
+        echo "The absolute path of the workspace:"
+        echo env.WORKSPACE
+
+        echo "For Subversion-based projects, this variable contains the revision number of the module. If you have more than one module specified, this won't be set:"
+        echo env.SVN_REVISION
+	
+        echo "For CVS-based projects, this variable contains the branch of the module. If CVS is configured to check out the trunk, this environment variable will not be set:"
+        echo env.CVS_BRANCH
+	
+        echo "For Git-based projects, this variable contains the Git hash of the commit checked out for the build (like ce9a3c1404e8c91be604088670e93434c4253f03) . (all the GIT_* variables require git plugin):"
+        echo env.GIT_COMMIT
+	
+        echo "For Git-based projects, this variable contains the Git url (like git@github.com:user/repo.git or [https://github.com/user/repo.git]):"
+        echo env.GIT_URL
+	
+	    echo "For Git-based projects, this variable contains the Git branch that was checked out for the build (normally origin/master):"
+        echo env.GIT_BRANCH 
+
+    }
+    echo '== Promoted Build Plugin Environment Variables =='
+    node('Comcave'){ 
+        
+        echo "The URL of the original Jenkins job that is involved with the promotion. BUILD_URL now refers to the Promotion's URL:"
+        echo env.PROMOTED_URL
+	    echo env.BUILD_URL
+        
+        echo "The name of the original Jenkins job that is involved with the promotion. JOB_NAME now refers to the Promotion's job's name:"
+        echo env.PROMOTED_JOB_NAME
+	    echo env.JOB_NAME
+	
+        echo "The Build Number of the job being promoted. BUILD_NUMBER now refer's the the Promotion Number:"
+        echo env.PROMOTED_NUMBER
+	    echo env.BUILD_NUMBER
+	
+	    echo "The Build ID (ex. '2005-08-22_23-59-59' (YYYY-MM-DD_hh-mm-ss) ) of the original Jenkins job. BUILD_ID now refer's to the Promotion's build ID:"
+        echo env.PROMOTED_ID
+	    echo env.BUILD_ID
+	    }
 }
 
 stage('Maven') {
@@ -65,4 +131,51 @@ stage('Maven') {
         def mvnHome = tool 'M3'
         sh "${mvnHome}/bin/mvn -B verify"
     }
+}
+
+stage('Interactive') {
+    node('Comcave'){ 
+        echo 'Interactive, infinitive wait'
+        //input 'Are you sure?'
+        echo 'Interactive, with timeout'
+        //timeout(time: 10, unit: 'SECONDS') { input 'Are you sure?' }
+    }
+}
+
+stage('Parallel1') {
+    echo 'Parallel11'
+    parallel 'Parallel1.1': {
+            node('Comcave'){ 
+                echo 'Parallel1.2'
+                echo env.WORKSPACE
+                def mvnHome = tool 'M3'
+                sh "${mvnHome}/bin/mvn -B verify"
+            }
+        }, 
+        'Parallel12': {
+            node('Comcave'){ 
+                echo 'Parallel1'
+                echo env.WORKSPACE
+                sh "java -version"
+            }
+        }
+}
+
+stage('Parallel2') {
+    echo 'Parallel21'
+    parallel 'Parallel2.1': {
+            node('Comcave'){ 
+                echo 'Parallel1'
+                echo env.WORKSPACE
+                sh "java -version"
+            }
+        }, 
+        'Parallel22': {
+            node('Comcave'){ 
+                echo 'Parallel2.2'
+                echo env.WORKSPACE
+                def mvnHome = tool 'M3'
+                sh "${mvnHome}/bin/mvn -B verify"
+            }
+        }
 }
